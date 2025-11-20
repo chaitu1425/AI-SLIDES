@@ -2,9 +2,7 @@ import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
 import connectdb from "./config/connectdb.js"
-import { SearchQuery } from "./controller/search.controller.js"
-import { GenerateDocument } from "./controller/generatecontroller.js"
-import { EditDocument } from "./controller/editcontroller.js"
+import { editPPT, generatePPT, previewPPT } from "./controller/search.controller.js"
 dotenv.config()
 
 const app = express()
@@ -20,12 +18,11 @@ app.get("/",(req,res)=>{
     res.send("hello");
 })
 
-app.post("/search",SearchQuery);
-app.post("/generate",GenerateDocument);
-app.post("/edit",EditDocument);
+app.post("/api/generate",generatePPT);
+app.post("/api/edit",editPPT);
+app.post("/api/preview",previewPPT);
 
 app.listen(PORT ,()=>{
     console.log(`Server running ${PORT}`);
     connectdb()
-    
 })
