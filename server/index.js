@@ -2,7 +2,7 @@ import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
 import connectdb from "./config/connectdb.js"
-import { editPPT, generatePPT, previewPPT } from "./controller/search.controller.js"
+import { Chat, editPPT, generatePPT, previewPPT } from "./controller/search.controller.js"
 dotenv.config()
 
 const app = express()
@@ -18,6 +18,7 @@ app.get("/",(req,res)=>{
     res.send("hello");
 })
 
+app.post("/api/chat",Chat);
 app.post("/api/generate",generatePPT);
 app.post("/api/edit",editPPT);
 app.post("/api/preview",previewPPT);

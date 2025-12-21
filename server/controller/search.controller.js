@@ -1,5 +1,33 @@
 import { getPresentationStructureFromGemini, editPresentationStructureFromGemini } from "../utils/gemini.js";
 
+
+export const Chat = async(req,res)=>{
+    try {
+    const { message } = req.body;
+
+    // Based on the message content, we decide the action (Generate/Edit/Preview PPT)
+    let reply = '';
+
+    if (message.toLowerCase().includes('ppt')) {
+      reply = "Generating your PPT..."; // Trigger PPT generation logic
+      res.json({ reply });
+    } else if (message.toLowerCase().includes('edit')) {
+      reply = "Editing your PPT..."; // Trigger PPT editing logic
+      res.json({ reply });
+    } else if (message.toLowerCase().includes('preview')) {
+      reply = "Previewing your PPT..."; // Trigger PPT preview logic
+      res.json({ reply });
+    } else {
+      reply = "How can I assist you today?";
+      res.json({ reply });
+    }
+  } catch (error) {
+    console.error("Error handling chat:", error);
+    res.status(500).json({ reply: "Sorry, there was an error processing your request." });
+  }
+}
+
+
 export const generatePPT = async (req, res) => {
     try {
         const { topic } = req.body;
@@ -78,7 +106,7 @@ export const previewPPT = async (req, res) => {
         if (!presentationJson) {
             return res.status(400).json({ success: false, message: "Presentation data is required" });
         }
-        
+
         res.status(200).json({
             success: true,
             message: "PPT preview generated successfully",

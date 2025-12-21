@@ -1,16 +1,6 @@
 import React, { useState } from "react";
-import {
-  Send,
-  Loader2,
-  File,
-  ArrowRight,
-  ArrowLeft,
-  Menu,
-  X,
-  MessageSquare,
-  Plus,
-  Download
-} from "lucide-react";
+import { Send, Loader2, File, ArrowRight, ArrowLeft, Menu, X, MessageSquare, Plus, Download } from "lucide-react";
+import axios from 'axios';
 
 const App = () => {
   const [input, setInput] = useState("");
@@ -22,8 +12,19 @@ const App = () => {
   const [chats, setChats] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
 
+  // Send the request to the backend
+  const sendMessageToBackend = async (message) => {
+    try {
+      const response = await axios.post("http://localhost:8000/api/chat", { message: message });
+      return response.data.reply;  // Assuming the response has a `reply` field
+    } catch (error) {
+      console.error("Error sending message to backend:", error);
+      return "Sorry, there was an error.";
+    }
+  };
+
   // Handle message send
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
 
@@ -55,30 +56,100 @@ const App = () => {
       return;
     }
 
-    // Normal chat mode
+    // Normal chat mode with request to backend for different functionalities
     if (input.toLowerCase().includes("ppt")) {
       setIsGenerating(true);
       const genMsg = { sender: "bot", text: "Generating your PPT..." };
       setMessages((prev) => [...prev, genMsg]);
 
-      setTimeout(() => {
+      try {
+        const response = await axios.post("http://localhost:8000/api/generate", { message: input });
         setIsGenerating(false);
+
         const fileMsg = {
           sender: "bot",
           type: "file",
           fileName: "AI_Presentation.pptx",
           text: "Your presentation is ready!",
         };
+
         setMessages((prev) => [...prev, fileMsg]);
         updateCurrentChat(fileMsg);
-      }, 2000);
-    } else {
-      setTimeout(() => {
-        const reply = { sender: "bot", text: "Got it! Anything else?" };
-        setMessages((prev) => [...prev, reply]);
-        updateCurrentChat(reply);
-      }, 700);
+      } catch (error) {
+        console.error("Error generating PPT:", error);
+        const errorMsg = { sender: "bot", text: "Sorry, there was an error generating your PPT." };
+        setMessages((prev) => [...prev, errorMsg]);
+        setIsGenerating(false);
+      }
+
+      setInput("");
+      return;
     }
+
+    if (input.toLowerCase().includes("edit")) {
+      setIsGenerating(true);
+      const editMsg = { sender: "bot", text: "Editing your PPT..." };
+      setMessages((prev) => [...prev, editMsg]);
+
+      try {
+        const response = await axios.post("http://localhost:8000/api/edit", { message: input });
+        setIsGenerating(false);
+
+        const fileMsg = {
+          sender: "bot",
+          type: "file",
+          fileName: "Edited_Presentation.pptx",
+          text: "Your presentation has been edited!",
+        };
+
+        setMessages((prev) => [...prev, fileMsg]);
+        updateCurrentChat(fileMsg);
+      } catch (error) {
+        console.error("Error editing PPT:", error);
+        const errorMsg = { sender: "bot", text: "Sorry, there was an error editing your PPT." };
+        setMessages((prev) => [...prev, errorMsg]);
+        setIsGenerating(false);
+      }
+
+      setInput("");
+      return;
+    }
+
+    if (input.toLowerCase().includes("preview")) {
+      setIsGenerating(true);
+      const previewMsg = { sender: "bot", text: "Previewing your PPT..." };
+      setMessages((prev) => [...prev, previewMsg]);
+
+      try {
+        const response = await axios.post("http://localhost:8000/api/preview", { message: input });
+        setIsGenerating(false);
+
+        const fileMsg = {
+          sender: "bot",
+          type: "file",
+          fileName: "Preview_Presentation.pptx",
+          text: "Your PPT preview is ready!",
+        };
+
+        setMessages((prev) => [...prev, fileMsg]);
+        updateCurrentChat(fileMsg);
+      } catch (error) {
+        console.error("Error previewing PPT:", error);
+        const errorMsg = { sender: "bot", text: "Sorry, there was an error previewing your PPT." };
+        setMessages((prev) => [...prev, errorMsg]);
+        setIsGenerating(false);
+      }
+
+      setInput("");
+      return;
+    }
+
+    setTimeout(async () => {
+      const botReply = await sendMessageToBackend(input);
+      const botMessage = { sender: "bot", text: botReply };
+      setMessages((prev) => [...prev, botMessage]);
+      updateCurrentChat(botMessage);
+    }, 700);
 
     updateCurrentChat(userMessage);
     setInput("");
@@ -114,7 +185,7 @@ const App = () => {
     setShowViewer(false);
   };
 
-  // handle dowload
+  // handle download
   const handleDownload = (fileName) => {
     const blob = new Blob(["This is a simulated PPT file."], {
       type: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
