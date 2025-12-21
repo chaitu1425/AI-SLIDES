@@ -1,11 +1,13 @@
-import User from "../models/User";
-import gentoken from "./token";
+import User from "../models/User.js";
+import gentoken from "./token.js";
+import validator from "validator"
+import bcrypt from "bcryptjs"
 
 
 export const signUp = async (req,res)=>{
     try {
         const {name,email,password} = req.body;
-        const userExist = await User.find({ email });
+        const userExist = await User.findOne({ email });
         if(userExist){
             return res.status(400).json({ message: "User Already exist"});
         }
