@@ -18,16 +18,14 @@ app.use(cors({
     methods: ["GET", "POST"],
     credentials: true,
 }))
-
 app.get("/",(req,res)=>{
-    res.send("hello");
+    res.send("hello"); 
 })
-
 app.post("/api/chat",Chat);
 app.post("/api/generate",generatePPT);
 app.post("/api/edit",editPPT);
 app.post("/api/preview",previewPPT);
-// authanticatiocn routes
+// authantication routes
 app.use("/api/auth",authroute)
 
 app.listen(PORT,()=>{
