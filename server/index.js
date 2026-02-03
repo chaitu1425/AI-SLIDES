@@ -27,7 +27,7 @@ app.post("/api/chat",Chat);
 app.post("/api/generate",generatePPT);
 app.post("/api/edit",editPPT);
 app.post("/api/preview",previewPPT);
-// authantication routes
+// authanticatiocn routes
 app.use("/api/auth",authroute)
 
 app.listen(PORT,()=>{
