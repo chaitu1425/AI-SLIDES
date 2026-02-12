@@ -28,7 +28,15 @@ app.post("/api/preview",previewPPT);
 // authantication routes
 app.use("/api/auth",authroute)
 
-app.listen(PORT,()=>{
-    console.log(`Server running ${PORT}`);
-    connectdb()
-})
+connectdb()
+    .then(() => {
+        app.listen(PORT, () => {
+            console.log(`✅ Server running on port ${PORT}`);
+        });
+    })
+    .catch((error) => {
+        console.error("❌ Failed to start server:", error.message);
+        process.exit(1);
+    });
+
+    
