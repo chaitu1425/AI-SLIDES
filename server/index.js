@@ -1,42 +1,38 @@
-import express from "express"
-import cors from "cors"
-import dotenv from "dotenv"
-import connectdb from "./config/connectdb.js"
-import { Chat, editPPT, generatePPT, previewPPT } from "./controller/search.controller.js"
-import authroute from "./routes/auth.js"
-import cookieParser from "cookie-parser"
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+import connectdb from "./config/connectdb.js";
+import authroute from "./routes/auth.js";
+import chatRoute from "./routes/chat.js";
+import pptRoute from "./routes/ppt.js";
 
+dotenv.config();
 
-dotenv.config()
+const app = express();
+const PORT = process.env.PORT || 8000;
 
-const app = express()
-const PORT = 8000
 app.use(express.json());
-app.use(cookieParser())
+app.use(cookieParser());
 app.use(cors({
     origin: "http://localhost:5173",
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "DELETE", "PUT"],
     credentials: true,
-}))
-app.get("/",(req,res)=>{
-    res.send("hello"); 
-})
-app.post("/api/chat",Chat);
-app.post("/api/generate",generatePPT);
-app.post("/api/edit",editPPT);
-app.post("/api/preview",previewPPT);
-// authantication routes
-app.use("/api/auth",authroute)
+}));
+
+app.get("/", (_req, res) => res.json({ status: "AI Slides API running" }));
+
+app.use("/api/auth", authroute);
+app.use("/api/chat", chatRoute);
+app.use("/api/ppt", pptRoute);
 
 connectdb()
     .then(() => {
         app.listen(PORT, () => {
-            console.log(`✅ Server running on port ${PORT}`);
+            console.log(`✅ Server running on ${PORT}`);
         });
     })
     .catch((error) => {
         console.error("❌ Failed to start server:", error.message);
         process.exit(1);
     });
-
-    
